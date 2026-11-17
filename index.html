@@ -126,7 +126,7 @@ button{font:inherit;cursor:pointer}
 .pp-item .main{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
 .pp-item .code{font-weight:600;min-width:130px;flex-shrink:0}
 .pp-item .name{color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pp-item .meta{display:grid;grid-template-columns:155px 105px;gap:8px;flex:none}
+.pp-item .meta{display:grid;grid-template-columns:170px 105px;gap:8px;flex:none}
 .pp-item .meta .chip{text-align:center}
 
 .pp-item mark{background:#ffe9a8;color:inherit;border-radius:2px}
@@ -403,7 +403,7 @@ textarea.ta:focus{outline:2px solid #ecd4f2;border-color:var(--brand)}
         <span class="err">Vui lòng chọn ít nhất 1 sản phẩm.</span>
       </div>
 
-      <div class="sel-wrap">
+      <!-- <div class="sel-wrap">
         <table>
           <thead>
             <tr>
@@ -413,7 +413,7 @@ textarea.ta:focus{outline:2px solid #ecd4f2;border-color:var(--brand)}
           </thead>
           <tbody id="selBody"></tbody>
         </table>
-      </div>
+      </div> -->
       <div class="sel-foot">
         <span id="selFoot"></span>
         <button type="button" class="linkbtn" id="selClear" hidden>Xóa tất cả</button>
@@ -433,12 +433,12 @@ textarea.ta:focus{outline:2px solid #ecd4f2;border-color:var(--brand)}
 <script>
 /* ---------- Dữ liệu mẫu (thay bằng API) ---------- */
 const PRODUCTS = [
-  {code:'TT15O', name:'Tiết kiệm Phát Lộc',        ptype:'Upfront Interest (Trả lãi đầu kỳ)',     acct:'fixed_term_savings', apply:'BEGINNING', rate:'TT15O'},
-  {code:'TT12M', name:'Tiết kiệm Online 12 tháng', ptype:'Arrears Interest (Trả lãi cuối kỳ)',    acct:'fixed_term_savings', apply:'ENDING',    rate:'TT12M'},
-  {code:'TT06A', name:'Tiết kiệm An Lộc',          ptype:'Upfront Interest (Trả lãi đầu kỳ)',     acct:'fixed_term_savings', apply:'BEGINNING', rate:'TT06A'},
-  {code:'TIME_DEPOSIT', name:'Tiền gửi có kỳ hạn', ptype:'Arrears Interest (Trả lãi cuối kỳ)',    acct:'fixed_term_savings', apply:'ENDING',    rate:'TD_STD'},
-  {code:'FLEX01', name:'Tiết kiệm linh hoạt',      ptype:'Monthly Interest (Trả lãi hàng tháng)', acct:'fixed_term_savings',   apply:'MONTHLY',   rate:'FLEX01'},
-  {code:'KKH_PLUS', name:'Tiền gửi không kỳ hạn Plus', ptype:'Monthly Interest (Trả lãi hàng tháng)', acct:'fixed_term_savings', apply:'MONTHLY',  rate:'KKH_P'}
+  {code:'TT15O', name:'Tiết kiệm Phát Lộc',        ptype:'Upfront Interest (Trả lãi đầu kỳ)',     acct:'Trả lãi đầu kỳ', apply:'UPFRONT INTEREST', rate:'TT15O'},
+  {code:'TT12M', name:'Tiết kiệm Online 12 tháng', ptype:'Arrears Interest (Trả lãi cuối kỳ)',    acct:'Trả lãi cuối kỳ', apply:'AT MATURITY',    rate:'TT12M'},
+  {code:'TT06A', name:'Tiết kiệm An Lộc',          ptype:'Upfront Interest (Trả lãi đầu kỳ)',     acct:'Trả lãi đầu kỳ', apply:'UPFRONT INTEREST', rate:'TT06A'},
+  {code:'TIME_DEPOSIT', name:'Tiền gửi có kỳ hạn', ptype:'Arrears Interest (Trả lãi cuối kỳ)',    acct:'Trả lãi cuối kỳ', apply:'AT MATURITY',    rate:'TD_STD'},
+  {code:'FLEX01', name:'Tiết kiệm linh hoạt',      ptype:'Monthly Interest (Trả lãi hàng tháng)', acct:'Trả lãi hàng tháng',   apply:'MONTHLY',   rate:'FLEX01'},
+  {code:'KKH_PLUS', name:'Tiền gửi không kỳ hạn Plus', ptype:'Monthly Interest (Trả lãi hàng tháng)', acct:'Trả lãi hàng tháng', apply:'MONTHLY',  rate:'KKH_P'}
 ];
 const TENANTS = ['VIKKI_BANK','VIKKI_PARTNER_A','VIKKI_PARTNER_B'];
 const UNITS   = ['DAY','WEEK','MONTH','YEAR'];
@@ -457,7 +457,7 @@ const $$ = s => [...document.querySelectorAll(s)];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const hl = (t,q) => { if(!q) return esc(t); const i=t.toLowerCase().indexOf(q.toLowerCase());
   return i<0 ? esc(t) : esc(t.slice(0,i))+'<mark>'+esc(t.slice(i,i+q.length))+'</mark>'+esc(t.slice(i+q.length)); };
-const applyChip = a => ({BEGINNING:'blue', ENDING:'green', MONTHLY:'amber'}[a] || 'grey');
+const applyChip = a => ({'UPFRONT INTEREST':'blue', 'AT MATURITY':'green', MONTHLY:'amber'}[a] || 'grey');
 const num = v => v === '' ? NaN : Number(v);
 
 let mode = 'update';
@@ -509,6 +509,38 @@ function renderList(){
   $('#ppAll').disabled  = !rows.length || nSel === rows.length;
   $('#ppNone').disabled = nSel === 0;
 }
+// function renderSelected(){
+//   const items = PRODUCTS.filter(p => selected.has(p.code));
+//   const shown = items.slice(0,3), rest = items.length - shown.length;
+//   trigger.querySelector('.ph, .val')?.remove();
+//   trigger.insertAdjacentHTML('afterbegin', items.length
+//     ? `<span class="val">${shown.map(p=>`<span class="tag">${esc(p.code)}<button type="button" data-rm="${esc(p.code)}" aria-label="Bỏ ${esc(p.code)}">×</button></span>`).join('')}${rest>0?`<span class="tag more">+${rest}</span>`:''}</span>`
+//     : `<span class="ph">Chọn một hoặc nhiều sản phẩm…</span>`);
+
+//   $('#selCount').textContent = `Đã chọn ${items.length}`;
+//   $('#selCount').className = 'chip ' + (items.length ? 'blue' : 'grey');
+
+//   $('#selBody').innerHTML = items.length ? items.map((p,i)=>`
+//     <tr>
+//       <td class="idx">${i+1}</td><td><b>${esc(p.code)}</b></td><td class="wrap">${esc(p.name)}</td>
+//       <td>${esc(p.ptype)}</td><td>${esc(p.acct)}</td>
+//       <td><span class="chip ${applyChip(p.apply)}">${esc(p.apply)}</span></td><td>${esc(p.rate)}</td>
+//       <td class="act"><button type="button" class="icon-btn" data-rm="${esc(p.code)}" title="Bỏ sản phẩm này" aria-label="Bỏ ${esc(p.code)}">×</button></td>
+//     </tr>`).join('')
+//     : `<tr><td class="empty" colspan="8">Chưa có sản phẩm nào. Bấm vào ô <b>Product Code</b> ở trên để chọn một hoặc nhiều sản phẩm áp dụng mã khuyến mãi này.</td></tr>`;
+
+//   $('#selFoot').textContent = items.length ? `Mã khuyến mãi áp dụng cho ${items.length} sản phẩm` : '';
+//   $('#selClear').hidden = items.length < 2;
+
+//   const kinds = [...new Set(items.map(p=>p.apply))];
+//   $('#mixNote').innerHTML = kinds.length > 1 ? `
+//     <div class="note warn"><b>Các sản phẩm đã chọn có kiểu áp dụng lãi suất khác nhau</b>
+//       Lãi suất ưu đãi và kỳ hạn ở trên sẽ được áp dụng chung cho tất cả sản phẩm. Vui lòng kiểm tra lại trước khi gửi:
+//       <ul>${kinds.map(k=>`<li>${esc(k)}: ${items.filter(p=>p.apply===k).map(p=>esc(p.code)).join(', ')}</li>`).join('')}</ul>
+//     </div>` : '';
+//   if(items.length) $('#productField').classList.remove('bad');
+// }
+
 function renderSelected(){
   const items = PRODUCTS.filter(p => selected.has(p.code));
   const shown = items.slice(0,3), rest = items.length - shown.length;
@@ -520,26 +552,19 @@ function renderSelected(){
   $('#selCount').textContent = `Đã chọn ${items.length}`;
   $('#selCount').className = 'chip ' + (items.length ? 'blue' : 'grey');
 
-  $('#selBody').innerHTML = items.length ? items.map((p,i)=>`
-    <tr>
-      <td class="idx">${i+1}</td><td><b>${esc(p.code)}</b></td><td class="wrap">${esc(p.name)}</td>
-      <td>${esc(p.ptype)}</td><td>${esc(p.acct)}</td>
-      <td><span class="chip ${applyChip(p.apply)}">${esc(p.apply)}</span></td><td>${esc(p.rate)}</td>
-      <td class="act"><button type="button" class="icon-btn" data-rm="${esc(p.code)}" title="Bỏ sản phẩm này" aria-label="Bỏ ${esc(p.code)}">×</button></td>
-    </tr>`).join('')
-    : `<tr><td class="empty" colspan="8">Chưa có sản phẩm nào. Bấm vào ô <b>Product Code</b> ở trên để chọn một hoặc nhiều sản phẩm áp dụng mã khuyến mãi này.</td></tr>`;
+  // (Đã xóa đoạn render #selBody và #selFoot ở đây)
 
-  $('#selFoot').textContent = items.length ? `Mã khuyến mãi áp dụng cho ${items.length} sản phẩm` : '';
   $('#selClear').hidden = items.length < 2;
 
   const kinds = [...new Set(items.map(p=>p.apply))];
-  $('#mixNote').innerHTML = kinds.length > 1 ? `
-    <div class="note warn"><b>Các sản phẩm đã chọn có kiểu áp dụng lãi suất khác nhau</b>
-      Lãi suất ưu đãi và kỳ hạn ở trên sẽ được áp dụng chung cho tất cả sản phẩm. Vui lòng kiểm tra lại trước khi gửi:
-      <ul>${kinds.map(k=>`<li>${esc(k)}: ${items.filter(p=>p.apply===k).map(p=>esc(p.code)).join(', ')}</li>`).join('')}</ul>
-    </div>` : '';
-  if(items.length) $('#productField').classList.remove('bad');
+  // $('#mixNote').innerHTML = kinds.length > 1 ? `
+  //   <div class="note warn"><b>Các sản phẩm đã chọn có kiểu áp dụng lãi suất khác nhau</b>
+  //     Lãi suất ưu đãi và kỳ hạn ở trên sẽ được áp dụng chung cho tất cả sản phẩm. Vui lòng kiểm tra lại trước khi gửi:
+  //     <ul>${kinds.map(k=>`<li>${esc(k)}: ${items.filter(p=>p.apply===k).map(p=>esc(p.code)).join(', ')}</li>`).join('')}</ul>
+  //   </div>` : '';
+  // if(items.length) $('#productField').classList.remove('bad');
 }
+
 const refresh = () => { renderList(); renderSelected(); };
 function setOpen(open){
   pp.classList.toggle('open', open);
@@ -560,7 +585,7 @@ $('#ppAll').addEventListener('click',  () => { visible().forEach(p=>selected.add
 $('#ppNone').addEventListener('click', () => { visible().forEach(p=>selected.delete(p.code)); refresh(); });
 $('#ppDone').addEventListener('click', () => { setOpen(false); trigger.focus(); });
 $('#selClear').addEventListener('click', () => { selected.clear(); refresh(); });
-$('#selBody').addEventListener('click', e => { const r=e.target.closest('[data-rm]'); if(r){ selected.delete(r.dataset.rm); refresh(); } });
+// $('#selBody').addEventListener('click', e => { const r=e.target.closest('[data-rm]'); if(r){ selected.delete(r.dataset.rm); refresh(); } });
 document.addEventListener('click', e => { if(pp.classList.contains('open') && !pp.contains(e.target)) setOpen(false); });
 
 /* ==========================================================
